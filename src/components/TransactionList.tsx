@@ -51,6 +51,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
                     >
                       {transaction.type}
                     </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {transaction.category}
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {new Date(transaction.date).toLocaleDateString('en-US', {

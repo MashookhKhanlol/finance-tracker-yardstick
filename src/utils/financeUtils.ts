@@ -1,5 +1,5 @@
 
-import { Transaction, MonthlyData } from '@/types/Transaction';
+import { Transaction, MonthlyData, CategoryData, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/types/Transaction';
 
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -51,4 +51,31 @@ export const calculateTotalBalance = (transactions: Transaction[]): number => {
       ? total + transaction.amount 
       : total - transaction.amount;
   }, 0);
+};
+
+export const getCategoryData = (transactions: Transaction[]): CategoryData[] => {
+  const expenseTransactions = transactions.filter(t => t.type === 'expense');
+  const categoryTotals = new Map<string, number>();
+
+  expenseTransactions.forEach(transaction => {
+    const current = categoryTotals.get(transaction.category) || 0;
+    categoryTotals.set(transaction.category, current + transaction.amount);
+  });
+
+  const colors = [
+    '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00',
+    '#ff00ff', '#00ffff', '#ffff00', '#ff0080'
+  ];
+
+  return Array.from(categoryTotals.entries())
+    .map(([name, value], index) => ({
+      name,
+      value,
+      color: colors[index % colors.length]
+    }))
+    .sort((a, b) => b.value - a.value);
+};
+
+export const getTopExpenseCategories = (transactions: Transaction[], limit: number = 3): CategoryData[] => {
+  return getCategoryData(transactions).slice(0, limit);
 };

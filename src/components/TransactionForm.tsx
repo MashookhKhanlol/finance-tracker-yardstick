@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Transaction } from '@/types/Transaction';
+import { Transaction, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/types/Transaction';
 import { generateId } from '@/utils/financeUtils';
 import { Plus, Edit } from 'lucide-react';
 
@@ -26,6 +26,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [category, setCategory] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -34,6 +35,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       setDate(editingTransaction.date);
       setDescription(editingTransaction.description);
       setType(editingTransaction.type);
+      setCategory(editingTransaction.category);
     } else {
       resetForm();
     }
@@ -44,6 +46,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     setDate(new Date().toISOString().split('T')[0]);
     setDescription('');
     setType('expense');
+    setCategory('');
     setErrors({});
   };
 
@@ -58,6 +61,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }
     if (!description.trim()) {
       newErrors.description = 'Description is required';
+    }
+    if (!category) {
+      newErrors.category = 'Category is required';
     }
 
     setErrors(newErrors);
@@ -75,6 +81,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       date,
       description: description.trim(),
       type,
+      category,
     };
 
     if (editingTransaction) {
@@ -90,6 +97,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     onCancelEdit();
     resetForm();
   };
+
+  const handleTypeChange = (newType: 'income' | 'expense') => {
+    setType(newType);
+    setCategory(''); // Reset category when type changes
+  };
+
+  const availableCategories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
   return (
     <Card className="w-full max-w-md">
@@ -110,6 +124,36 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <Select value={type} onValueChange={handleTypeChange}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="income">Income</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableCategories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="amount">Amount</Label>
             <Input
@@ -146,19 +190,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               className={errors.description ? 'border-red-500' : ''}
             />
             {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Type</Label>
-            <Select value={type} onValueChange={(value: 'income' | 'expense') => setType(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="expense">Expense</SelectItem>
-                <SelectItem value="income">Income</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="flex gap-2 pt-4">

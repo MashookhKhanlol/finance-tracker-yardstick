@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import TransactionForm from '@/components/TransactionForm';
 import TransactionList from '@/components/TransactionList';
 import MonthlyChart from '@/components/MonthlyChart';
+import CategoryChart from '@/components/CategoryChart';
 import { Transaction } from '@/types/Transaction';
-import { getMonthlyData, calculateTotalBalance, formatCurrency } from '@/utils/financeUtils';
+import { getMonthlyData, calculateTotalBalance, formatCurrency, getCategoryData, getTopExpenseCategories } from '@/utils/financeUtils';
 import { useToast } from '@/hooks/use-toast';
+import { TrendingUp, TrendingDown, Wallet, PieChart } from 'lucide-react';
 
 const Index = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -74,6 +76,12 @@ const Index = () => {
   const totalExpenses = transactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
+  
+  const categoryData = getCategoryData(transactions);
+  const topCategories = getTopExpenseCategories(transactions, 3);
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -85,10 +93,13 @@ const Index = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium opacity-90">Total Income</CardTitle>
+              <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Total Income
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{formatCurrency(totalIncome)}</p>
@@ -97,7 +108,10 @@ const Index = () => {
 
           <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium opacity-90">Total Expenses</CardTitle>
+              <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                <TrendingDown className="h-4 w-4" />
+                Total Expenses
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{formatCurrency(totalExpenses)}</p>
@@ -110,7 +124,10 @@ const Index = () => {
               : 'from-orange-500 to-orange-600'
           }`}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium opacity-90">Net Balance</CardTitle>
+              <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                <Wallet className="h-4 w-4" />
+                Net Balance
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">
@@ -118,7 +135,48 @@ const Index = () => {
               </p>
             </CardContent>
           </Card>
+
+          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                <PieChart className="h-4 w-4" />
+                Top Category
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg font-bold">
+                {topCategories.length > 0 ? topCategories[0].name : 'No data'}
+              </p>
+              <p className="text-sm opacity-90">
+                {topCategories.length > 0 ? formatCurrency(topCategories[0].value) : ''}
+              </p>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Category Breakdown Cards */}
+        {topCategories.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Top Expense Categories</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {topCategories.map((category, index) => (
+                <Card key={category.name} className="border-l-4" style={{ borderLeftColor: category.color }}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{category.name}</p>
+                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(category.value)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Rank #{index + 1}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -132,10 +190,42 @@ const Index = () => {
             />
           </div>
 
-          {/* Chart and Transaction List */}
+          {/* Charts and Transaction List */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Monthly Chart */}
-            <MonthlyChart data={monthlyData} />
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              {/* Monthly Chart */}
+              <MonthlyChart data={monthlyData} />
+              
+              {/* Category Chart */}
+              <CategoryChart data={categoryData} />
+            </div>
+
+            {/* Recent Transactions Summary */}
+            {recentTransactions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Transactions Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {recentTransactions.map((transaction) => (
+                      <div key={transaction.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
+                        <div>
+                          <p className="font-medium">{transaction.description}</p>
+                          <p className="text-sm text-gray-500">{transaction.category}</p>
+                        </div>
+                        <p className={`font-semibold ${
+                          transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Transaction List */}
             <TransactionList
