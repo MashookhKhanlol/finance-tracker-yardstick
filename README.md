@@ -159,4 +159,3 @@ For support and questions:
 
 ---
 
-Built with ❤️ using [Lovable](https://lovable.dev)
