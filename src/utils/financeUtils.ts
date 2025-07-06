@@ -1,5 +1,4 @@
-
-import { Transaction, MonthlyData, CategoryData, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/types/Transaction';
+import { Transaction, MonthlyData, CategoryData, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Budget, BudgetComparison, SpendingInsight } from '@/types/Transaction';
 
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -78,4 +77,125 @@ export const getCategoryData = (transactions: Transaction[]): CategoryData[] => 
 
 export const getTopExpenseCategories = (transactions: Transaction[], limit: number = 3): CategoryData[] => {
   return getCategoryData(transactions).slice(0, limit);
+};
+
+export const getBudgetComparison = (transactions: Transaction[], budgets: Budget[], month: string): BudgetComparison[] => {
+  const monthBudgets = budgets.filter(b => b.month === month);
+  const monthTransactions = transactions.filter(t => {
+    const transactionMonth = new Date(t.date).toISOString().slice(0, 7);
+    return transactionMonth === month && t.type === 'expense';
+  });
+
+  return monthBudgets.map(budget => {
+    const categoryExpenses = monthTransactions
+      .filter(t => t.category === budget.category)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const remaining = budget.amount - categoryExpenses;
+    const percentage = budget.amount > 0 ? (categoryExpenses / budget.amount) * 100 : 0;
+
+    return {
+      category: budget.category,
+      budgeted: budget.amount,
+      actual: categoryExpenses,
+      remaining,
+      percentage,
+    };
+  });
+};
+
+export const generateSpendingInsights = (
+  transactions: Transaction[], 
+  budgets: Budget[], 
+  currentMonth: string
+): SpendingInsight[] => {
+  const insights: SpendingInsight[] = [];
+  const budgetComparison = getBudgetComparison(transactions, budgets, currentMonth);
+  
+  // Budget overspend warnings
+  budgetComparison.forEach(budget => {
+    if (budget.percentage > 100) {
+      insights.push({
+        type: 'warning',
+        title: 'Budget Exceeded',
+        description: `You've spent ${budget.percentage.toFixed(0)}% of your ${budget.category} budget this month.`,
+        category: budget.category,
+        amount: budget.actual - budget.budgeted,
+      });
+    } else if (budget.percentage > 80) {
+      insights.push({
+        type: 'warning',
+        title: 'Budget Alert',
+        description: `You're close to reaching your ${budget.category} budget limit (${budget.percentage.toFixed(0)}%).`,
+        category: budget.category,
+        amount: budget.remaining,
+      });
+    }
+  });
+
+  // Success insights for staying under budget
+  budgetComparison.forEach(budget => {
+    if (budget.percentage < 50 && budget.actual > 0) {
+      insights.push({
+        type: 'success',
+        title: 'Great Savings!',
+        description: `You're doing well with your ${budget.category} budget, using only ${budget.percentage.toFixed(0)}%.`,
+        category: budget.category,
+        amount: budget.remaining,
+      });
+    }
+  });
+
+  // Top spending category insight
+  const currentMonthExpenses = transactions.filter(t => {
+    const transactionMonth = new Date(t.date).toISOString().slice(0, 7);
+    return transactionMonth === currentMonth && t.type === 'expense';
+  });
+
+  if (currentMonthExpenses.length > 0) {
+    const categoryTotals = new Map<string, number>();
+    currentMonthExpenses.forEach(t => {
+      categoryTotals.set(t.category, (categoryTotals.get(t.category) || 0) + t.amount);
+    });
+
+    const topCategory = Array.from(categoryTotals.entries())
+      .sort((a, b) => b[1] - a[1])[0];
+
+    if (topCategory) {
+      insights.push({
+        type: 'info',
+        title: 'Top Spending Category',
+        description: `Your highest spending this month is in ${topCategory[0]}.`,
+        category: topCategory[0],
+        amount: topCategory[1],
+      });
+    }
+  }
+
+  // Income vs expenses insight
+  const monthlyBalance = calculateTotalBalance(
+    transactions.filter(t => new Date(t.date).toISOString().slice(0, 7) === currentMonth)
+  );
+
+  if (monthlyBalance < 0) {
+    insights.push({
+      type: 'warning',
+      title: 'Monthly Deficit',
+      description: `Your expenses exceeded income this month by $${Math.abs(monthlyBalance).toFixed(2)}.`,
+      amount: Math.abs(monthlyBalance),
+    });
+  } else if (monthlyBalance > 0) {
+    insights.push({
+      type: 'success',
+      title: 'Monthly Surplus',
+      description: `Great job! You saved $${monthlyBalance.toFixed(2)} this month.`,
+      amount: monthlyBalance,
+    });
+  }
+
+  return insights.slice(0, 6); // Limit to 6 insights
+};
+
+export const getCurrentMonth = (): string => {
+  return new Date().toISOString().slice(0, 7); // YYYY-MM format
 };

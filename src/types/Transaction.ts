@@ -1,4 +1,3 @@
-
 export interface Transaction {
   id: string;
   amount: number;
@@ -43,3 +42,26 @@ export const INCOME_CATEGORIES = [
 
 export type ExpenseCategory = typeof EXPENSE_CATEGORIES[number];
 export type IncomeCategory = typeof INCOME_CATEGORIES[number];
+
+export interface Budget {
+  id: string;
+  category: string;
+  amount: number;
+  month: string; // YYYY-MM format
+}
+
+export interface BudgetComparison {
+  category: string;
+  budgeted: number;
+  actual: number;
+  remaining: number;
+  percentage: number;
+}
+
+export interface SpendingInsight {
+  type: 'warning' | 'info' | 'success';
+  title: string;
+  description: string;
+  category?: string;
+  amount?: number;
+}
