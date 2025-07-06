@@ -1,75 +1,162 @@
-# Welcome to your Lovable project
 
-## Project info
+# Personal Finance Visualizer
 
-**URL**: https://lovable.dev/projects/b5da3a55-4299-42b5-91cb-7e7c98a423c0
+A comprehensive personal finance tracking application built with React, TypeScript, and modern web technologies. Track your income, expenses, set budgets, and gain insights into your spending patterns with beautiful visualizations.
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+### Core Functionality
+- **Transaction Management**: Add, edit, and delete income and expense transactions
+- **Category Organization**: Organize transactions by predefined categories (Food & Dining, Transportation, Shopping, etc.)
+- **Real-time Balance Tracking**: Monitor your net balance with live calculations
 
-**Use Lovable**
+### Advanced Budgeting
+- **Monthly Category Budgets**: Set spending limits for different categories each month
+- **Budget vs Actual Comparison**: Visual charts showing budgeted vs actual spending
+- **Budget Progress Tracking**: See how much of your budget remains in each category
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b5da3a55-4299-42b5-91cb-7e7c98a423c0) and start prompting.
+### Visualizations & Insights
+- **Monthly Trends Chart**: Track income and expenses over time
+- **Category Breakdown**: Pie chart showing spending distribution across categories
+- **Top Expense Categories**: Quick view of your biggest spending areas
+- **Spending Insights**: AI-powered insights that warn about overspending and highlight patterns
 
-Changes made via Lovable will be committed automatically to this repo.
+### Data Persistence
+- **Local Storage**: All data is saved locally in your browser
+- **Export/Import Ready**: Data structure supports easy backup and restoration
 
-**Use your preferred IDE**
+## 🛠️ Technologies Used
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development and building
+- **Styling**: Tailwind CSS for responsive design
+- **UI Components**: shadcn/ui component library
+- **Charts**: Recharts for data visualization
+- **Icons**: Lucide React for beautiful icons
+- **State Management**: React hooks and local storage
+- **Form Handling**: React Hook Form with Zod validation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-update readme 
+## 🎯 Getting Started
 
-Follow these steps:
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
 
-```sh
-udpate readme
-# Step 1: Clone the repository using the project's Git URL.
+### Installation
+
+1. Clone the repository:
+```bash
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Install dependencies:
+```bash
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open your browser and navigate to `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📊 How to Use
 
-**Use GitHub Codespaces**
+### Adding Transactions
+1. Use the transaction form on the left side of the dashboard
+2. Select transaction type (Income or Expense)
+3. Enter amount, description, category, and date
+4. Click "Add Transaction" to save
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Setting Budgets
+1. Use the budget form below the transaction form
+2. Select a category and set your monthly budget limit
+3. Track your progress with the budget comparison chart
 
-## What technologies are used for this project?
+### Viewing Insights
+- Check the summary cards at the top for quick overview
+- View spending insights for personalized recommendations
+- Use charts to understand your financial patterns
+- Monitor recent transactions in the transaction list
 
-This project is built with:
+## 🏗️ Project Structure
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   ├── BudgetForm.tsx
+│   ├── BudgetComparisonChart.tsx
+│   ├── CategoryChart.tsx
+│   ├── MonthlyChart.tsx
+│   ├── SpendingInsights.tsx
+│   ├── TransactionForm.tsx
+│   └── TransactionList.tsx
+├── pages/              # Page components
+│   ├── Index.tsx       # Main dashboard page
+│   └── NotFound.tsx
+├── types/              # TypeScript type definitions
+│   └── Transaction.ts
+├── utils/              # Utility functions
+│   └── financeUtils.ts
+└── hooks/              # Custom React hooks
+```
 
-## How can I deploy this project?
+## 🎨 Customization
 
-Simply open [Lovable](https://lovable.dev/projects/b5da3a55-4299-42b5-91cb-7e7c98a423c0) and click on Share -> Publish.
+### Adding New Categories
+Update the `EXPENSE_CATEGORIES` or `INCOME_CATEGORIES` arrays in `src/types/Transaction.ts`.
 
-## Can I connect a custom domain to my Lovable project?
+### Modifying Charts
+Chart configurations can be found in their respective component files in the `src/components/` directory.
 
-Yes, you can!
+### Styling
+The project uses Tailwind CSS. Modify styles directly in component files or update the Tailwind configuration.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🚀 Deployment
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Deploy with Lovable
+1. Open your project in Lovable
+2. Click the "Publish" button in the top right
+3. Your app will be deployed automatically
+
+### Deploy Elsewhere
+The project builds to static files and can be deployed on any static hosting service:
+
+```bash
+npm run build
+```
+
+Then deploy the `dist` folder to your hosting provider.
+
+## 🔒 Data Privacy
+
+- All financial data is stored locally in your browser
+- No data is sent to external servers
+- Your financial information remains completely private
+
+## 🤝 Contributing
+
+This project was built with Lovable. To contribute:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📝 License
+
+This project is open source and available under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+- Check the [Lovable Documentation](https://docs.lovable.dev/)
+- Join the [Lovable Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
+- Review the codebase and component documentation
+
+---
+
+Built with ❤️ using [Lovable](https://lovable.dev)
